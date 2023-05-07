@@ -6,8 +6,8 @@
 
 Services that will start
 
-nzbget
-sonarr
-radarr
-plex-server
-overseerr
+- nzbget
+- sonarr
+- radarr
+- plex-server
+- overseerr
