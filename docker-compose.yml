@@ -1,0 +1,86 @@
+version: '2.1'
+services:
+  nzbget:
+    container_name: nzbget
+    image: linuxserver/nzbget:latest
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+    volumes:
+      - ${DOWNLOADFOLDER}:/downloads # download folder
+      #- ${ROOT}/downloads:/downloads # download folder
+      - ${ROOT}/config/nzbget:/config # config files
+
+  sonarr:
+    container_name: sonarr
+    image: linuxserver/sonarr:latest
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${ROOT}/config/sonarr:/config # config files
+      - ${MEDIA}/complete/tv:/tv # tv shows folder
+      - ${DOWNLOADFOLDER}:/downloads # download folder
+
+  radarr:
+    container_name: radarr
+    image: linuxserver/radarr:latest
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${ROOT}/config/radarr:/config # config files
+      - ${MEDIA}/complete/movies:/movies # movies folder
+      - ${DOWNLOADFOLDER}:/downloads # download folder
+
+  plex-server:
+    container_name: plex-server
+    image: plexinc/pms-docker:latest
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ} # timezone, defined in .env
+    network_mode: host
+    volumes:
+      - ${ROOT}/config/plex/db:/config # plex database
+      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
+      - ${MEDIA}/complete:/data # media library
+
+  tautulli:
+      image: lscr.io/linuxserver/tautulli
+      container_name: tautulli
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=${TZ}
+      volumes:
+        - ${ROOT}/config/tautulli:/config
+      ports:
+        - 8181:8181
+      restart: always  
+
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    volumes:
+      - ${ROOT}/config/overseerr:/config
+    ports:
+      - 5055:5055
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    restart: unless-stopped
